@@ -1,6 +1,14 @@
 [package]
-name = "telemetry"
+name = "pbar-telemetry"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+anyhow = "1"
+bon = "2"
+camino = "1"
+console-subscriber = "0.4"
+tracing = "0.1"
+tracing-glog = { version = "0.4", features = ["local-time"] }
+tracing-log = "0.2"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

@@ -1,6 +1,9 @@
 [package]
-name = "cli"
+name = "pbar-cli"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+anyhow = "1"
+pbar-telemetry = { path = "../telemetry" }
+tracing = "0.1"
