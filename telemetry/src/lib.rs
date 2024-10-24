@@ -8,6 +8,7 @@ use anyhow::Result;
 use bon::builder;
 use bon::Builder;
 use camino::Utf8PathBuf;
+use tracing_log::LogTracer;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::EnvFilter;
 
@@ -47,9 +48,12 @@ impl TracingConfig {
     ///
     /// # Errors
     ///
+    /// - On failure to setup `tracing_log`
     /// - On failure opening log lines file
     /// - On failure setting global default subscriber
     pub fn init(&self) -> Result<()> {
+        LogTracer::init()?;
+
         let lines_filter = EnvFilter::builder().parse_lossy(&self.log_level);
         let lines_writer = OpenOptions::new()
             .create(true)
