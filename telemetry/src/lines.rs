@@ -15,10 +15,19 @@ pub fn glog_layer(filter: EnvFilter, file: File) -> Box<dyn Layer<Registry> + Se
     let color = file.is_terminal();
 
     tracing_subscriber::fmt::layer()
-        .with_writer(file)
         .event_format(Glog::default().with_timer(LocalTime::default()))
         .fmt_fields(GlogFields::default())
         .with_ansi(color)
+        .with_writer(file)
+        .with_filter(filter)
+        .boxed()
+}
+
+/// Log lines layer in JSON format.
+pub fn json_layer(filter: EnvFilter, file: File) -> Box<dyn Layer<Registry> + Send + Sync> {
+    tracing_subscriber::fmt::layer()
+        .json()
+        .with_writer(file)
         .with_filter(filter)
         .boxed()
 }

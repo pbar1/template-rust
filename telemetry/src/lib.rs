@@ -21,6 +21,19 @@ pub struct TracingConfig {
     /// Filter directive for log lines. Default is **info**.
     #[builder(default = String::from("info"))]
     log_level: String,
+
+    /// Output format for log lines. Default is **glog**.
+    #[builder(default = LogFormat::Glog)]
+    log_format: LogFormat,
+}
+
+/// Supported output formats for log lines.
+#[derive(Debug, Clone, Copy)]
+pub enum LogFormat {
+    /// [Glog format](https://docs.rs/tracing-glog/latest/tracing_glog).
+    Glog,
+    /// [JSON format](https://docs.rs/tracing-subscriber/latest/tracing_subscriber/fmt/format/struct.Json.html).
+    Json,
 }
 
 impl Default for TracingConfig {
@@ -42,7 +55,10 @@ impl TracingConfig {
             .create(true)
             .append(true)
             .open(&self.log_file)?;
-        let lines_layer = lines::glog_layer(lines_filter, lines_writer);
+        let lines_layer = match self.log_format {
+            LogFormat::Glog => lines::glog_layer(lines_filter, lines_writer),
+            LogFormat::Json => lines::json_layer(lines_filter, lines_writer),
+        };
 
         let subscriber = tracing_subscriber::registry().with(lines_layer);
         tracing::subscriber::set_global_default(subscriber)?;
