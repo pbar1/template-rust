@@ -31,6 +31,7 @@ jobs:
         file: cli/Dockerfile
         context: .
         platforms: linux/amd64
+        build-args: ARCH=x86_64 # FIXME: Can't set dynamically if multiplatform
         push: true
         tags: ghcr.io/pbar1/template-rust-cli:latest
         cache-from: type=gha

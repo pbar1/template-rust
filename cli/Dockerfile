@@ -1,6 +1,10 @@
-# https://github.com/LukeMathWalker/cargo-chef
+# https://github.com/LukeMathWalker/cargo-chef#running-the-binary-in-alpine
 
-FROM lukemathwalker/cargo-chef:latest-rust-1 AS chef
+# Using the `rust-musl-builder` as base image, instead of
+# the official Rust toolchain
+FROM clux/muslrust:stable AS chef
+USER root
+RUN cargo install cargo-chef
 WORKDIR /app
 
 FROM chef AS planner
@@ -9,15 +13,16 @@ RUN cargo chef prepare --recipe-path recipe.json
 
 FROM chef AS builder
 COPY --from=planner /app/recipe.json recipe.json
-# Build dependencies - this is the caching Docker layer!
-RUN cargo chef cook --release --recipe-path recipe.json
-# Build application
+# Notice that we are specifying the --target flag!
+ARG ARCH
+RUN cargo chef cook --release --target $ARCH-unknown-linux-musl --recipe-path recipe.json
 COPY . .
-RUN cargo build --release --bin template-rust-cli
+RUN cargo build --release --target $ARCH-unknown-linux-musl --bin template-rust-cli
 
-# We do not need the Rust toolchain to run the binary!
-FROM debian:bookworm-slim AS runtime
-WORKDIR /app
-COPY --from=builder /app/target/release/template-rust-cli /usr/local/bin
+FROM alpine AS runtime
+ARG ARCH
+RUN addgroup -S user && adduser -S user -G user
+COPY --from=builder /app/target/$ARCH-unknown-linux-musl/release/template-rust-cli /usr/local/bin/
+USER user
 ENTRYPOINT ["/usr/local/bin/template-rust-cli"]
 LABEL org.opencontainers.image.source="https://github.com/pbar1/template-rust"

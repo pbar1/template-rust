@@ -7,7 +7,7 @@ edition = "2021"
 anyhow = "1"
 bon = "2"
 camino = "1"
-console-subscriber = "0.4"
+# console-subscriber = "0.4"
 tracing = "0.1"
 tracing-glog = { version = "0.4", features = ["local-time"] }
 tracing-log = "0.2"
