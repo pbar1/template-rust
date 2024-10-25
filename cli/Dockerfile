@@ -20,4 +20,4 @@ FROM debian:bookworm-slim AS runtime
 WORKDIR /app
 COPY --from=builder /app/target/release/template-rust-cli /usr/local/bin
 ENTRYPOINT ["/usr/local/bin/template-rust-cli"]
-LABEL org.opencontainers.image.source https://github.com/pbar1/template-rust
+LABEL org.opencontainers.image.source="https://github.com/pbar1/template-rust"
