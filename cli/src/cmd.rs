@@ -33,5 +33,7 @@ enum Subcommand {
 pub async fn run() -> Result<()> {
     let cli = Cli::parse();
 
+    cli.tracing.init()?;
+
     cli.subcommand.run().await
 }

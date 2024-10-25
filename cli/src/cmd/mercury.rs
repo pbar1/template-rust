@@ -14,6 +14,13 @@ pub struct MercuryArgs {
 impl Run for MercuryArgs {
     async fn run(&self) -> Result<()> {
         println!("The first planet is: {}", self.name);
+
+        tracing::error!("error");
+        tracing::warn!("warn");
+        tracing::info!("info");
+        tracing::debug!("debug");
+        tracing::trace!("trace");
+
         Ok(())
     }
 }

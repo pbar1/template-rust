@@ -24,7 +24,7 @@ pub struct TracingArgs {
 }
 
 impl TracingArgs {
-    pub fn init_tracing(self) -> Result<()> {
+    pub fn init(self) -> Result<()> {
         let log_format = match self.log_format.as_str() {
             "glog" => LogFormat::Glog,
             "json" => LogFormat::Json,
