@@ -1,15 +1,10 @@
-use anyhow::Result;
-use pbar_telemetry::TracingConfig;
+#![warn(clippy::pedantic)]
+#![allow(clippy::module_name_repetitions)]
 
-fn main() -> Result<()> {
-    TracingConfig::builder()
-        .log_level("trace".into())
-        .build()
-        .init()?;
+mod args;
+mod cmd;
 
-    tracing::info!(foo = "foo", "this");
-    tracing::error!(bar = "bar", "that");
-    tracing::debug!(baz = "baz", "thence");
-
-    Ok(())
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    cmd::run().await
 }
