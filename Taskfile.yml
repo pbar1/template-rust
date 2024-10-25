@@ -1,0 +1,21 @@
+version: "3"
+
+tasks:
+  default: task --list
+
+  build:
+    aliases: ["b"]
+    desc: Builds program executable
+    cmd: cargo build
+
+  image:
+    aliases: ["i", "img"]
+    desc: Builds container image
+    cmds:
+    - docker build --tag=ghcr.io/pbar1/template-rust-cli --file=cli/Dockerfile .
+
+  fmt:
+    aliases: ["f"]
+    desc: Formats the code
+    cmds:
+    - cargo +nightly fmt
