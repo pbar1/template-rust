@@ -1,3 +1,5 @@
+//! Logging lines to a file/stdout/stderr.
+
 use bon::builder;
 use bon::Builder;
 use strum::EnumString;
@@ -7,9 +9,8 @@ use tracing_glog::LocalTime;
 use tracing_subscriber::fmt::writer::BoxMakeWriter;
 use tracing_subscriber::EnvFilter;
 use tracing_subscriber::Layer;
-use tracing_subscriber::Registry;
 
-type BoxLayer = Box<dyn Layer<Registry> + Send + Sync>;
+use super::BoxLayer;
 
 #[derive(Debug, Clone, Copy, EnumString)]
 #[strum(ascii_case_insensitive)]
@@ -34,6 +35,7 @@ impl LinesConfig {
         }
     }
 
+    // TODO: This now relies on the caller handling ASNI properly
     fn glog_layer(self) -> BoxLayer {
         tracing_subscriber::fmt::layer()
             .event_format(Glog::default().with_timer(LocalTime::default()))

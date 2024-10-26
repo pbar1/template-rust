@@ -1,6 +1,11 @@
+//! Common defaults for various `tracing` components.
+
 #![warn(clippy::pedantic)]
 
+#[cfg(feature = "lines")]
 pub mod lines;
+#[cfg(feature = "otel")]
+pub mod otel;
 
 use std::fs::OpenOptions;
 
@@ -12,18 +17,26 @@ use tracing_log::LogTracer;
 use tracing_subscriber::fmt::writer::BoxMakeWriter;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::EnvFilter;
+use tracing_subscriber::Layer;
+use tracing_subscriber::Registry;
 
-/// Opinionated all-in-one config for [`tracing`].
+/// Type-erased `Layer` for ease of construction.
+pub type BoxLayer = Box<dyn Layer<Registry> + Send + Sync>;
+
+/// All-in-one config for `tracing` layers.
 #[derive(Debug, Clone, Builder)]
 pub struct TracingConfig {
+    #[cfg(feature = "lines")]
     /// Output file for log lines. Default is **stderr**.
     #[builder(default = Utf8PathBuf::from("/dev/fd/2"))]
     log_file: Utf8PathBuf,
 
+    #[cfg(feature = "lines")]
     /// Filter directive for log lines. Default is **info**.
     #[builder(default = String::from("info"))]
     log_level: String,
 
+    #[cfg(feature = "lines")]
     /// Output format for log lines. Default is **glog**.
     #[builder(default = lines::LinesFormat::Glog)]
     log_format: lines::LinesFormat,
@@ -44,21 +57,35 @@ impl TracingConfig {
     /// - On failure opening log lines file
     /// - On failure setting global default subscriber
     pub fn init(&self) -> Result<()> {
+        // TODO: Is this necessary or does tracing-subscriber already do this?
         LogTracer::init()?;
 
-        let lines_filter = EnvFilter::builder().parse_lossy(&self.log_level);
-        let lines_writer = OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open(&self.log_file)?;
-        let lines_layer = lines::LinesConfig::builder()
-            .writer(BoxMakeWriter::new(lines_writer))
-            .filter(lines_filter)
-            .format(self.log_format)
-            .build()
-            .layer();
+        // `Registry::with` can take a Vec, easing dynamic construction
+        let mut layers = Vec::new();
 
-        let subscriber = tracing_subscriber::registry().with(lines_layer);
+        #[cfg(feature = "lines")]
+        {
+            let filter = EnvFilter::builder().parse_lossy(&self.log_level);
+            let writer = OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(&self.log_file)?;
+            let layer = lines::LinesConfig::builder()
+                .writer(BoxMakeWriter::new(writer))
+                .filter(filter)
+                .format(self.log_format)
+                .build()
+                .layer();
+            layers.push(layer);
+        }
+
+        #[cfg(feature = "otel")]
+        {
+            layers.push(otel::OtelConfig::builder().build().layer());
+        }
+
+        let subscriber = tracing_subscriber::registry().with(layers);
+
         tracing::subscriber::set_global_default(subscriber)?;
 
         Ok(())
