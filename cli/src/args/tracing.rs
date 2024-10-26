@@ -8,14 +8,17 @@ const HEADING: &str = "Tracing Options";
 
 #[derive(Debug, Args)]
 pub struct TracingArgs {
-    /// Output file for log lines.
+    // TODO: Reloadable on SIGUSR1
+    /// Filter directive for log lines.
     #[clap(short, long, default_value = "info", env = "RUST_LOG", help_heading = HEADING, global = true)]
     pub log_level: String,
 
-    /// Filter directive for log lines.
+    // TODO: Anstream handling
+    /// Output file for log lines.
     #[clap(long, default_value = "/dev/fd/2", help_heading = HEADING, global = true)]
     pub log_file: Utf8PathBuf,
 
+    // TODO: Variants in help
     /// Output format for log lines.
     #[clap(long, default_value = "glog", help_heading = HEADING, global = true)]
     pub log_format: LinesFormat,
