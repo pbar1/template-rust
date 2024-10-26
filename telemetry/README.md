@@ -1,10 +1,11 @@
 # Telemetry
 
-Common `tracing` layers preconfigured, as well as global subscriber
-initialization. Enable/disable the layers with Cargo features.
+Common `tracing` layers preconfigured.
 
-| Cargo Feature | Enabled by default? | Description                           |
-| ------------- | ------------------- | ------------------------------------- |
-| `lines`       | 🟢                  | Logging lines to a file/stdout/stderr |
-| `otel`        |                     | OpenTelemetry support                 |
-| `console`     |                     | `tokio-console` support               |
+Enable/disable the layers with Cargo features.
+
+| Cargo Feature | Description                           | Enabled by default? |
+| ------------- | ------------------------------------- | ------------------- |
+| `lines`       | Logging lines to a file/stdout/stderr | 🟢                  |
+| `otel`        | OpenTelemetry support                 |
+| `console`     | `tokio-console` support               |
