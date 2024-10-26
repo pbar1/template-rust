@@ -55,7 +55,8 @@ impl TracingConfig {
     /// # Errors
     ///
     /// - On failure to setup `tracing_log`
-    /// - On failure opening log lines file
+    /// - (If enabled) On failure opening log lines file
+    /// - (If enabled) On failure to setup OpenTelemetry layer
     /// - On failure setting global default subscriber
     pub fn init(&self) -> Result<()> {
         // TODO: Is this necessary or does tracing-subscriber already do this?
@@ -82,7 +83,8 @@ impl TracingConfig {
 
         #[cfg(feature = "otel")]
         {
-            layers.push(otel::OtelConfig::builder().build().layer());
+            let layer = otel::OtelConfig::builder().build().layer()?;
+            layers.push(layer);
         }
 
         #[cfg(feature = "console")]

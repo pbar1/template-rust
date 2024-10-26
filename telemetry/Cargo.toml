@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-default = ["full"]
+default = ["lines", "otel"]
 full = ["lines", "otel", "console"]
 lines = []
 otel = ["dep:opentelemetry", "dep:opentelemetry-otlp", "dep:opentelemetry_sdk", "dep:tracing-opentelemetry"]
@@ -17,9 +17,9 @@ bon = "2"
 camino = "1"
 console-subscriber = { version = "0.4", optional = true }
 opentelemetry = { version = "0.26", optional = true }
-opentelemetry-otlp = { version = "0.26", optional = true }
+opentelemetry-otlp = { version = "0.26", features = ["grpc-tonic"], optional = true }
 opentelemetry-stdout = "0.26.0"
-opentelemetry_sdk = { version = "0.26", optional = true }
+opentelemetry_sdk = { version = "0.26", features = ["rt-tokio"], optional = true }
 strum = { version = "0.26.3", features = ["derive"] }
 tracing = "0.1"
 tracing-glog = { version = "0.4", features = ["local-time"] }

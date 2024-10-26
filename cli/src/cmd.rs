@@ -1,6 +1,7 @@
 //! CLI command structure
 
-mod mercury;
+mod logs;
+mod metrics;
 
 use anyhow::Result;
 use clap::Parser;
@@ -26,7 +27,8 @@ pub trait Run {
 #[enum_dispatch(Run)]
 #[derive(Debug, clap::Subcommand)]
 enum Subcommand {
-    Mercury(mercury::MercuryArgs),
+    Logs(logs::LogsArgs),
+    Metrics(metrics::MetricsArgs),
 }
 
 /// Entrypoint into the CLI, to be called by [`crate::main`].
