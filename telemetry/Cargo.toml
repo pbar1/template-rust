@@ -4,10 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+anstream = "0.6.17"
 anyhow = "1"
 bon = "2"
 camino = "1"
-# console-subscriber = "0.4"
+strum = { version = "0.26.3", features = ["derive"] }
 tracing = "0.1"
 tracing-glog = { version = "0.4", features = ["local-time"] }
 tracing-log = "0.2"

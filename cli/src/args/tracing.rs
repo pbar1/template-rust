@@ -1,8 +1,7 @@
-use anyhow::bail;
 use anyhow::Result;
 use camino::Utf8PathBuf;
 use clap::Args;
-use pbar_telemetry::LogFormat;
+use pbar_telemetry::lines::LinesFormat;
 use pbar_telemetry::TracingConfig;
 
 const HEADING: &str = "Tracing Options";
@@ -17,24 +16,17 @@ pub struct TracingArgs {
     #[clap(long, default_value = "/dev/fd/2", help_heading = HEADING, global = true)]
     pub log_file: Utf8PathBuf,
 
-    // TODO: Enum values
     /// Output format for log lines.
     #[clap(long, default_value = "glog", help_heading = HEADING, global = true)]
-    pub log_format: String,
+    pub log_format: LinesFormat,
 }
 
 impl TracingArgs {
     pub fn init(self) -> Result<()> {
-        let log_format = match self.log_format.as_str() {
-            "glog" => LogFormat::Glog,
-            "json" => LogFormat::Json,
-            unknown => bail!("unsupported log format: {unknown}"),
-        };
-
         TracingConfig::builder()
             .log_level(self.log_level)
             .log_file(self.log_file)
-            .log_format(log_format)
+            .log_format(self.log_format)
             .build()
             .init()
     }

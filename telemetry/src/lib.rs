@@ -1,6 +1,6 @@
 #![warn(clippy::pedantic)]
 
-mod lines;
+pub mod lines;
 
 use std::fs::OpenOptions;
 
@@ -9,6 +9,7 @@ use bon::builder;
 use bon::Builder;
 use camino::Utf8PathBuf;
 use tracing_log::LogTracer;
+use tracing_subscriber::fmt::writer::BoxMakeWriter;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::EnvFilter;
 
@@ -24,17 +25,8 @@ pub struct TracingConfig {
     log_level: String,
 
     /// Output format for log lines. Default is **glog**.
-    #[builder(default = LogFormat::Glog)]
-    log_format: LogFormat,
-}
-
-/// Supported output formats for log lines.
-#[derive(Debug, Clone, Copy)]
-pub enum LogFormat {
-    /// [Glog format](https://docs.rs/tracing-glog/latest/tracing_glog).
-    Glog,
-    /// [JSON format](https://docs.rs/tracing-subscriber/latest/tracing_subscriber/fmt/format/struct.Json.html).
-    Json,
+    #[builder(default = lines::LinesFormat::Glog)]
+    log_format: lines::LinesFormat,
 }
 
 impl Default for TracingConfig {
@@ -59,10 +51,12 @@ impl TracingConfig {
             .create(true)
             .append(true)
             .open(&self.log_file)?;
-        let lines_layer = match self.log_format {
-            LogFormat::Glog => lines::glog_layer(lines_filter, lines_writer),
-            LogFormat::Json => lines::json_layer(lines_filter, lines_writer),
-        };
+        let lines_layer = lines::LinesConfig::builder()
+            .writer(BoxMakeWriter::new(lines_writer))
+            .filter(lines_filter)
+            .format(self.log_format)
+            .build()
+            .layer();
 
         let subscriber = tracing_subscriber::registry().with(lines_layer);
         tracing::subscriber::set_global_default(subscriber)?;
