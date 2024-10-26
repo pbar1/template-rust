@@ -41,6 +41,11 @@ pub struct TracingConfig {
     /// Output format for log lines. Default is **glog**.
     #[builder(default = lines::LinesFormat::Glog)]
     log_format: lines::LinesFormat,
+
+    #[cfg(feature = "otel")]
+    /// Service name for OpenTelemetry. Default is **template-rust**.
+    #[builder(default = String::from("template-rust"))]
+    service_name: String,
 }
 
 impl Default for TracingConfig {
@@ -83,7 +88,10 @@ impl TracingConfig {
 
         #[cfg(feature = "otel")]
         {
-            let layer = otel::OtelConfig::builder().build().layer()?;
+            let layer = otel::OtelConfig::builder()
+                .service_name(self.service_name.to_owned())
+                .build()
+                .layer()?;
             layers.push(layer);
         }
 

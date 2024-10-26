@@ -1,29 +1,38 @@
 //! OpenTelemetry support for logs, metrics, and traces.
 
 use anyhow::Result;
+use bon::builder;
 use bon::Builder;
-use opentelemetry_sdk::metrics::reader::DefaultTemporalitySelector;
-use opentelemetry_sdk::metrics::PeriodicReader;
-use opentelemetry_sdk::metrics::SdkMeterProvider;
+use opentelemetry::KeyValue;
+use opentelemetry_otlp::WithExportConfig;
 use opentelemetry_sdk::runtime::Tokio;
+use opentelemetry_sdk::Resource;
 use tracing_subscriber::Layer;
 
 use super::BoxLayer;
 
 #[derive(Debug, Builder)]
-pub struct OtelConfig {}
+pub struct OtelConfig {
+    #[builder(default = "http://localhost:4317".into())]
+    otlp_endpoint: String,
+
+    service_name: String,
+}
 
 impl OtelConfig {
     pub fn layer(self) -> Result<BoxLayer> {
-        let temporality = Box::new(DefaultTemporalitySelector::new());
-
         let exporter = opentelemetry_otlp::new_exporter()
             .tonic()
-            .build_metrics_exporter(temporality)?;
+            .with_endpoint(self.otlp_endpoint);
 
-        let reader = PeriodicReader::builder(exporter, Tokio).build();
-
-        let meter = SdkMeterProvider::builder().with_reader(reader).build();
+        let meter = opentelemetry_otlp::new_pipeline()
+            .metrics(Tokio)
+            .with_exporter(exporter)
+            .with_resource(Resource::new(vec![KeyValue::new(
+                "service.name",
+                self.service_name,
+            )]))
+            .build()?;
 
         let layer = tracing_opentelemetry::MetricsLayer::new(meter).boxed();
 
