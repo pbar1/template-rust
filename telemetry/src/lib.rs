@@ -1,5 +1,4 @@
-//! Common defaults for various `tracing` components.
-
+#![doc = include_str!("../README.md")]
 #![warn(clippy::pedantic)]
 
 #[cfg(feature = "console")]
