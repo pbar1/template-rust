@@ -1,10 +1,8 @@
 //! OpenTelemetry support for logs, metrics, and traces.
 
 use anyhow::Result;
-use bon::builder;
 use bon::Builder;
 use opentelemetry::KeyValue;
-use opentelemetry_otlp::WithExportConfig;
 use opentelemetry_sdk::runtime::Tokio;
 use opentelemetry_sdk::Resource;
 use tracing_subscriber::Layer;
@@ -13,17 +11,14 @@ use super::BoxLayer;
 
 #[derive(Debug, Builder)]
 pub struct OtelConfig {
-    #[builder(default = "http://localhost:4317".into())]
-    otlp_endpoint: String,
-
     service_name: String,
 }
 
 impl OtelConfig {
     pub fn layer(self) -> Result<BoxLayer> {
-        let exporter = opentelemetry_otlp::new_exporter()
-            .tonic()
-            .with_endpoint(self.otlp_endpoint);
+        // TODO: See if protocol can be selected by
+        // OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+        let exporter = opentelemetry_otlp::new_exporter().http();
 
         let meter = opentelemetry_otlp::new_pipeline()
             .metrics(Tokio)
