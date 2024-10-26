@@ -5,15 +5,17 @@ edition = "2021"
 
 [features]
 default = ["full"]
-full = ["lines", "otel"]
+full = ["lines", "otel", "console"]
 lines = []
 otel = ["dep:opentelemetry", "dep:opentelemetry-otlp", "dep:opentelemetry_sdk", "dep:tracing-opentelemetry"]
+console = ["dep:console-subscriber"]
 
 [dependencies]
 anstream = "0.6"
 anyhow = "1"
 bon = "2"
 camino = "1"
+console-subscriber = { version = "0.4", optional = true }
 opentelemetry = { version = "0.26", optional = true }
 opentelemetry-otlp = { version = "0.26", optional = true }
 opentelemetry-stdout = "0.26.0"

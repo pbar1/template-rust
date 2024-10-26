@@ -2,6 +2,8 @@
 
 #![warn(clippy::pedantic)]
 
+#[cfg(feature = "console")]
+pub mod console;
 #[cfg(feature = "lines")]
 pub mod lines;
 #[cfg(feature = "otel")]
@@ -84,8 +86,13 @@ impl TracingConfig {
             layers.push(otel::OtelConfig::builder().build().layer());
         }
 
-        let subscriber = tracing_subscriber::registry().with(layers);
+        #[cfg(feature = "console")]
+        {
+            let layer = console::ConsoleConfig::builder().build().layer();
+            layers.push(layer);
+        }
 
+        let subscriber = tracing_subscriber::registry().with(layers);
         tracing::subscriber::set_global_default(subscriber)?;
 
         Ok(())
