@@ -3,20 +3,26 @@ version: "3"
 tasks:
   default: task --list
 
+  init:
+    desc: Initializes the repo
+    cmds:
+    - pre-commit install --hook-type commit-msg
+
   build:
-    aliases: ["b"]
+    aliases: [ "b" ]
     desc: Builds program executable
     cmd: cargo build
 
   # TODO: Resolve arch build arg automatically
   image:
-    aliases: ["i", "img"]
+    aliases: [ "i", "img" ]
     desc: Builds container image
     cmds:
-    - docker build  --build-arg ARCH=aarch64 --tag=ghcr.io/pbar1/template-rust-cli --file=cli/Dockerfile .
+    - docker build  --build-arg ARCH=aarch64
+      --tag=ghcr.io/pbar1/template-rust-cli --file=cli/Dockerfile .
 
   fmt:
-    aliases: ["f"]
+    aliases: [ "f" ]
     desc: Formats the code
     cmds:
     - cargo +nightly fmt
