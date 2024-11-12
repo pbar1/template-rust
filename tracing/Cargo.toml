@@ -2,6 +2,7 @@
 name = "tracing-pbar"
 version = "0.1.0"
 edition = "2021"
+description = "Ready-to-use tracing config"
 
 [features]
 default = ["lines"]
