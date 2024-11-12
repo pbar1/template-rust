@@ -17,6 +17,8 @@ use super::BoxLayer;
 pub enum LinesFormat {
     Glog,
     Json,
+    Full,
+    Simple,
 }
 
 #[derive(Debug, Builder)]
@@ -32,6 +34,8 @@ impl LinesConfig {
         match self.format {
             LinesFormat::Glog => self.glog_layer(),
             LinesFormat::Json => self.json_layer(),
+            LinesFormat::Full => self.full_layer(),
+            LinesFormat::Simple => self.simple_layer(),
         }
     }
 
@@ -48,6 +52,24 @@ impl LinesConfig {
     fn json_layer(self) -> BoxLayer {
         tracing_subscriber::fmt::layer()
             .json()
+            .with_writer(self.writer)
+            .with_filter(self.filter)
+            .boxed()
+    }
+
+    fn full_layer(self) -> BoxLayer {
+        tracing_subscriber::fmt::layer()
+            .with_writer(self.writer)
+            .with_filter(self.filter)
+            .boxed()
+    }
+
+    fn simple_layer(self) -> BoxLayer {
+        tracing_subscriber::fmt::layer()
+            .compact()
+            .with_level(false)
+            .with_target(false)
+            .without_time()
             .with_writer(self.writer)
             .with_filter(self.filter)
             .boxed()

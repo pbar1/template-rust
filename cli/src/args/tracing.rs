@@ -2,8 +2,8 @@ use anyhow::Result;
 use camino::Utf8PathBuf;
 use clap::Args;
 use humantime::Duration;
-use pbar_telemetry::lines::LinesFormat;
-use pbar_telemetry::TracingConfig;
+use tracing_pbar::lines::LinesFormat;
+use tracing_pbar::TracingConfig;
 
 const HEADING: &str = "Tracing Options";
 
