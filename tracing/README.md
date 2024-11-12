@@ -1,4 +1,4 @@
-# Telemetry
+# `tracing-pbar`
 
 Common `tracing` layers preconfigured.
 
