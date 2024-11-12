@@ -2,5 +2,3 @@
 resolver = "2"
 members = ["cli", "tracing"]
 package.repository = "https://github.com/pbar1/template-rust"
-package.license = "MIT"
-package.license-file = "LICENSE"
