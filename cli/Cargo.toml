@@ -5,9 +5,10 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1"
-camino = "1.1.9"
+camino = "1"
 clap = { version = "4", features = ["derive", "env"] }
 enum_dispatch = "0.3"
-pbar-telemetry = { path = "../telemetry" }
+humantime = "2"
 tokio = { version = "1", features = ["full"] }
 tracing = "0.1"
+tracing-pbar = { path = "../telemetry" }

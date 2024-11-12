@@ -1,6 +1,7 @@
 use anyhow::Result;
 use camino::Utf8PathBuf;
 use clap::Args;
+use humantime::Duration;
 use pbar_telemetry::lines::LinesFormat;
 use pbar_telemetry::TracingConfig;
 
@@ -22,9 +23,14 @@ pub struct TracingArgs {
     /// Output format for log lines.
     #[clap(long, default_value = "glog", help_heading = HEADING, global = true)]
     pub log_format: LinesFormat,
+
+    /// Waits for the given duration when set. Facilitates debugging tracing.
+    #[clap(long, help_heading = HEADING, global = true)]
+    pub wait: Option<Duration>,
 }
 
 impl TracingArgs {
+    /// Initializes tracing globally.
     pub fn init(self) -> Result<()> {
         TracingConfig::builder()
             .log_level(self.log_level)

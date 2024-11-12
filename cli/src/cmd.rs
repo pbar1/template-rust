@@ -35,7 +35,14 @@ enum Subcommand {
 pub async fn run() -> Result<()> {
     let cli = Cli::parse();
 
+    let wait = cli.tracing.wait;
     cli.tracing.init()?;
 
-    cli.subcommand.run().await
+    cli.subcommand.run().await?;
+
+    if let Some(dur) = wait {
+        tokio::time::sleep(dur.into()).await;
+    }
+
+    Ok(())
 }
