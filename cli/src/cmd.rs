@@ -2,6 +2,7 @@
 
 mod logs;
 mod metrics;
+mod wait;
 
 use anyhow::Result;
 use clap::Parser;
@@ -29,6 +30,7 @@ pub trait Run {
 enum Subcommand {
     Logs(logs::LogsArgs),
     Metrics(metrics::MetricsArgs),
+    Wait(wait::WaitArgs),
 }
 
 /// Entrypoint into the CLI, to be called by [`crate::main`].
