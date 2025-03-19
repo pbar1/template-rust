@@ -46,16 +46,6 @@ pub struct EventConfig {
     /// Event that should be broadcast upon creation of the killfile.
     #[builder(default = EventType::Terminate)]
     killfile_event: EventType,
-
-    #[cfg(feature = "signal")]
-    /// Event that should be published upon receiving an interrupt signal.
-    #[builder(default = EventType::Terminate)]
-    _interrupt_event: EventType,
-
-    #[cfg(feature = "signal")]
-    /// Event that should be published upon receiving a termination signal.
-    #[builder(default = EventType::Terminate)]
-    _terminate_event: EventType,
 }
 
 impl Default for EventConfig {
@@ -78,13 +68,16 @@ impl EventConfig {
         #[cfg(feature = "filewatch")]
         {
             if let Some(killfile) = &self.killfile_path {
-                let killfile_guard = filewatch::killfile(tx, &killfile, self.killfile_event)?;
-                guards.push(killfile_guard);
+                let guard = filewatch::killfile(tx.clone(), &killfile, self.killfile_event)?;
+                guards.push(guard);
             }
         }
 
         #[cfg(feature = "signal")]
-        {}
+        {
+            let guard = signal::termsignal(tx.clone())?;
+            guards.push(guard);
+        }
 
         Ok((rx, guards))
     }
