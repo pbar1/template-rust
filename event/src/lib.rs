@@ -78,8 +78,7 @@ impl EventConfig {
         #[cfg(feature = "filewatch")]
         {
             if let Some(killfile) = &self.killfile_path {
-                let killfile_guard =
-                    filewatch::killfile(tx.clone(), &killfile, self.killfile_event)?;
+                let killfile_guard = filewatch::killfile(tx, &killfile, self.killfile_event)?;
                 guards.push(killfile_guard);
             }
         }
