@@ -1,4 +1,4 @@
 [workspace]
 resolver = "2"
-members = ["cli", "tracing"]
+members = ["cli", "tracing", "event"]
 package.repository = "https://github.com/pbar1/template-rust"

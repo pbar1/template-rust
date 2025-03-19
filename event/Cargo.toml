@@ -1,0 +1,22 @@
+[package]
+name = "event-pbar"
+version = "0.1.0"
+edition = "2021"
+description = "Ready-to-use signal and killswitch handling"
+license = "MIT"
+
+[features]
+default = ["signal", "filewatch"]
+signal = []
+filewatch = ["dep:notify"]
+
+[dependencies]
+anyhow = "1"
+bon = "2"
+camino = "1"
+futures = "0.3.31"
+notify = { version = "8", optional = true }
+tracing = "0.1"
+
+[dev-dependencies]
+rstest = "0.25.0"
