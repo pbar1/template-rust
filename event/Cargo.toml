@@ -6,9 +6,10 @@ description = "Ready-to-use signal and killswitch handling"
 license = "MIT"
 
 [features]
-default = ["signal", "filewatch"]
+default = ["signal", "filewatch", "tokio"]
 signal = []
 filewatch = ["dep:notify-debouncer-full"]
+tokio = ["dep:tokio"]
 
 [dependencies]
 anyhow = "1"
@@ -16,6 +17,7 @@ bon = "2"
 camino = "1"
 futures = "0.3"
 notify-debouncer-full = { version = "0.5", optional = true }
+tokio = { version = "1", features = ["sync", "signal"], optional = true }
 tracing = "0.1"
 
 [dev-dependencies]

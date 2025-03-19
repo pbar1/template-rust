@@ -3,11 +3,11 @@
 
 use std::any::Any;
 use std::path::PathBuf;
-use std::sync::mpsc;
 
 use bon::builder;
 use bon::Builder;
 use camino::Utf8PathBuf;
+use tracing::debug;
 
 #[cfg(feature = "filewatch")]
 pub mod filewatch;
@@ -50,12 +50,12 @@ pub struct EventConfig {
     #[cfg(feature = "signal")]
     /// Event that should be published upon receiving an interrupt signal.
     #[builder(default = EventType::Terminate)]
-    interrupt_event: EventType,
+    _interrupt_event: EventType,
 
     #[cfg(feature = "signal")]
     /// Event that should be published upon receiving a termination signal.
     #[builder(default = EventType::Terminate)]
-    terminate_event: EventType,
+    _terminate_event: EventType,
 }
 
 impl Default for EventConfig {
@@ -71,8 +71,8 @@ impl EventConfig {
     ///
     /// If the guards that are returned by this function are dropped, no more
     /// values will be produced.
-    pub fn listen(&self) -> anyhow::Result<(mpsc::Receiver<Event>, Vec<Guard>)> {
-        let (tx, rx) = mpsc::channel();
+    pub fn listen(&self) -> anyhow::Result<(std::sync::mpsc::Receiver<Event>, Vec<Guard>)> {
+        let (tx, rx) = std::sync::mpsc::channel();
         let mut guards = Vec::new();
 
         #[cfg(feature = "filewatch")]
@@ -87,6 +87,30 @@ impl EventConfig {
         {}
 
         Ok((rx, guards))
+    }
+
+    #[cfg(feature = "tokio")]
+    /// Async version of [`EventConfig::listen`] compatible with Tokio.
+    ///
+    /// Spawns a thread to bridge the std and Tokio channels. If either receive
+    /// or send fail, the loop is broken and the thread ends.
+    pub fn listen_tokio(
+        &self,
+    ) -> anyhow::Result<(tokio::sync::mpsc::UnboundedReceiver<Event>, Vec<Guard>)> {
+        let (std_rx, guards) = self.listen()?;
+        let (tok_tx, tok_rx) = tokio::sync::mpsc::unbounded_channel();
+
+        // TODO: Should we put the JoinHandle into guards?
+        tokio::task::spawn_blocking(move || {
+            while let Ok(event) = std_rx.recv() {
+                if let Err(error) = tok_tx.send(event) {
+                    debug!(?error, "tokio mpsc sender was closed, exiting bridge loop");
+                    break;
+                }
+            }
+        });
+
+        Ok((tok_rx, guards))
     }
 }
 
