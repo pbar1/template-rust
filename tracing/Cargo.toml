@@ -8,8 +8,8 @@ license = "MIT"
 [features]
 default = ["lines"]
 full = ["lines", "otel", "console"]
-lines = []
-otel = ["dep:opentelemetry", "dep:opentelemetry-otlp", "dep:opentelemetry_sdk", "dep:tracing-opentelemetry"]
+lines = ["dep:tracing-appender", "dep:tracing-glog"]
+otel = ["dep:opentelemetry", "dep:opentelemetry-otlp", "dep:opentelemetry-stdout", "dep:opentelemetry_sdk", "dep:tracing-opentelemetry"]
 console = ["dep:console-subscriber"]
 
 [dependencies]
@@ -20,12 +20,11 @@ camino = "1"
 console-subscriber = { version = "0.4", optional = true }
 opentelemetry = { version = "0.26", optional = true }
 opentelemetry-otlp = { version = "0.26", features = ["http-proto", "reqwest-client", "reqwest-rustls-webpki-roots"], optional = true }
-opentelemetry-stdout = "0.26.0"
+opentelemetry-stdout = { version = "0.26", optional = true }
 opentelemetry_sdk = { version = "0.26", features = ["rt-tokio"], optional = true }
 strum = { version = "0.26.3", features = ["derive"] }
 tracing = "0.1"
-tracing-appender = "0.2.3"
-tracing-glog = { version = "0.4", features = ["local-time"] }
-tracing-log = "0.2"
+tracing-appender = { version = "0.2", optional = true }
+tracing-glog = { version = "0.4", features = ["local-time"], optional = true }
 tracing-opentelemetry = { version = "0.27", optional = true }
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }

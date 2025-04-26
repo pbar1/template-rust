@@ -8,13 +8,13 @@ pub mod lines;
 #[cfg(feature = "otel")]
 pub mod otel;
 
+use std::any::Any;
 use std::fs::OpenOptions;
 
 use anyhow::Result;
 use bon::builder;
 use bon::Builder;
 use camino::Utf8PathBuf;
-use tracing_log::LogTracer;
 use tracing_subscriber::fmt::writer::BoxMakeWriter;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::EnvFilter;
@@ -23,6 +23,15 @@ use tracing_subscriber::Registry;
 
 /// Type-erased `Layer` for ease of construction.
 pub type BoxLayer = Box<dyn Layer<Registry> + Send + Sync>;
+
+/// Holder for guards needed by configured layers.
+///
+/// **NOTE:** Must be assigned to a variable not called `_`, otherwise it will
+/// be dropped immediately.
+#[derive(Debug, Default)]
+pub struct Guard {
+    guards: Vec<Box<dyn Any>>,
+}
 
 /// All-in-one config for `tracing` layers.
 #[derive(Debug, Clone, Builder)]
@@ -63,12 +72,10 @@ impl TracingConfig {
     /// - (If enabled) On failure opening log lines file
     /// - (If enabled) On failure to setup OpenTelemetry layer
     /// - On failure setting global default subscriber
-    pub fn init(&self) -> Result<()> {
-        // TODO: Is this necessary or does tracing-subscriber already do this?
-        LogTracer::init()?;
-
+    pub fn init(&self) -> Result<Guard> {
         // `Registry::with` can take a Vec, easing dynamic construction
         let mut layers = Vec::new();
+        let mut guard = Guard::default();
 
         #[cfg(feature = "lines")]
         {
@@ -104,6 +111,6 @@ impl TracingConfig {
         let subscriber = tracing_subscriber::registry().with(layers);
         tracing::subscriber::set_global_default(subscriber)?;
 
-        Ok(())
+        Ok(guard)
     }
 }
