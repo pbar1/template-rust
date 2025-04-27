@@ -33,6 +33,12 @@ pub struct Guard {
     guards: Vec<Box<dyn Any>>,
 }
 
+impl Guard {
+    fn push(&mut self, g: impl Any) {
+        self.guards.push(Box::new(g));
+    }
+}
+
 /// All-in-one config for `tracing` layers.
 #[derive(Debug, Clone, Builder)]
 pub struct TracingConfig {
@@ -75,7 +81,7 @@ impl TracingConfig {
     pub fn init(&self) -> Result<Guard> {
         // `Registry::with` can take a Vec, easing dynamic construction
         let mut layers = Vec::new();
-        let mut guard = Guard::default();
+        let mut guards = Guard::default();
 
         #[cfg(feature = "lines")]
         {
@@ -84,6 +90,7 @@ impl TracingConfig {
                 .create(true)
                 .append(true)
                 .open(&self.log_file)?;
+            let (writer, guard) = tracing_appender::non_blocking(writer);
             let layer = lines::LinesConfig::builder()
                 .writer(BoxMakeWriter::new(writer))
                 .filter(filter)
@@ -91,6 +98,7 @@ impl TracingConfig {
                 .build()
                 .layer();
             layers.push(layer);
+            guards.push(guard);
         }
 
         #[cfg(feature = "otel")]
@@ -111,6 +119,6 @@ impl TracingConfig {
         let subscriber = tracing_subscriber::registry().with(layers);
         tracing::subscriber::set_global_default(subscriber)?;
 
-        Ok(guard)
+        Ok(guards)
     }
 }
